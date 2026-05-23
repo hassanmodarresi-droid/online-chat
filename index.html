@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Online Chat</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Join Screen -->
+  <div id="join-screen" class="screen">
+    <div class="join-card">
+      <h1>💬 Online Chat</h1>
+      <p class="subtitle">Real-time chat for two people</p>
+      <input id="username-input" type="text" placeholder="Your name" maxlength="20" />
+      <input id="room-input" type="text" placeholder="Room code (share with friend)" maxlength="30" />
+      <button id="join-btn">Join Room</button>
+      <p id="join-error" class="error hidden"></p>
+    </div>
+  </div>
+
+  <!-- Chat Screen -->
+  <div id="chat-screen" class="screen hidden">
+    <div class="chat-container">
+      <header class="chat-header">
+        <div class="header-info">
+          <span id="room-name"></span>
+          <span id="status-indicator"></span>
+        </div>
+        <div id="users-display" class="users-display"></div>
+      </header>
+
+      <div id="messages" class="messages"></div>
+
+      <div id="typing-indicator" class="typing-indicator hidden"></div>
+
+      <footer class="chat-footer">
+        <input id="msg-input" type="text" placeholder="Type a message…" maxlength="500" autocomplete="off" />
+        <button id="send-btn" title="Send message">➤</button>
+      </footer>
+    </div>
+  </div>
+
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script src="chat.js"></script>
+</body>
+</html>
