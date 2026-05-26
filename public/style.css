@@ -219,5 +219,33 @@ body {
   flex-shrink: 0;
   line-height: 1;
 }
+
+/* Upload button */
+#upload-btn {
+  background: #3a3a6a;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.1s;
+  flex-shrink: 0;
+}
+#upload-btn:hover { background: #33335a; }
+#upload-btn:active { transform: scale(0.92); }
+
+/* Message images */
+.msg-bubble img.msg-image {
+  display: block;
+  margin-top: 8px;
+  border-radius: 10px;
+  max-width: min(60vw, 260px);
+  height: auto;
+}
 #send-btn:hover { background: #5a52e0; }
 #send-btn:active { transform: scale(0.92); }

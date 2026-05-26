@@ -14,24 +14,20 @@ The original server.py had problems serving static files on Railway:
 
 **Updated server.py now:**
 - Uses absolute paths: `BASE_DIR = os.path.dirname(os.path.abspath(__file__))`
-- Serves all static assets with explicit routes:
-  - `/` → index.html
-  - `/style.css` → style.css
-  - `/chat.js` → chat.js
-  - `/static/<file>` → any static file
-- Includes error handling with fallback to index.html (SPA support)
-- Uses `threading` mode instead of deprecated `eventlet`
-- Logs static folder location on startup for debugging
-- Uses `send_file()` instead of `send_from_directory()` for index.html
+- Serves static assets from the `public/` folder and exposes `/uploads/` for uploaded images
+- Adds POST `/upload` with size and type validation, and returns JSON `{url: '/uploads/<file>'}`
+- Uses `MAX_CONTENT_LENGTH` to enforce 5 MB limit server-side
 
-**Updated requirements.txt:**
-- Removed `eventlet` (deprecated)
-- Added `gunicorn==23.0.0` for production deployment
-- Kept all Flask-SocketIO dependencies
+**Requirements & Procfile:**
+- `requirements.txt` already includes `flask`, `flask-socketio`, `eventlet`, and `gunicorn` — these are suitable for production Socket.IO with Gunicorn + eventlet worker.
+- **Procfile** updated to use Gunicorn with the eventlet worker:
+   - `web: gunicorn -k eventlet -w 1 server:app`
+   - Single worker (`-w 1`) is recommended for WebSocket apps when using Socket.IO; scale with caution and consider using external message queue/manager.
 
-**Updated Procfile:**
-- Simple: `web: python server.py`
-- Railway auto-detects Python and runs the app
+**Important note about uploads on cloud hosts:**
+- Most PaaS (Heroku, Railway, Render) use ephemeral filesystems. Files saved to `uploads/` will be lost when the dyno/container restarts or is redeployed.
+- For persistent image storage in production, use an external object store such as AWS S3, Google Cloud Storage, or Azure Blob Storage. Keep the current `uploads/` behavior for temporary/local storage.
+
 
 ---
 
@@ -97,3 +93,27 @@ Then visit: http://localhost:8080
 2. Verify public folder exists with index.html
 3. Hard refresh browser (Ctrl+Shift+R)
 4. Clear Cloudflare cache if needed
+
+### Enabling S3 presigned uploads
+
+- Set these environment variables in your deployment platform:
+   - `S3_BUCKET` — your S3 bucket name
+   - `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`
+   - `AWS_REGION` (optional)
+
+- The server exposes a `/presign` endpoint that returns a presigned PUT URL and a `public_url`. The client will upload directly to S3 using that URL and then send the `public_url` in the chat message.
+
+- S3 bucket requirements:
+   - Configure CORS to allow PUT from your origin. Example CORS policy:
+
+```xml
+<CORSConfiguration>
+   <CORSRule>
+      <AllowedOrigin>*</AllowedOrigin>
+      <AllowedMethod>PUT</AllowedMethod>
+      <AllowedHeader>*</AllowedHeader>
+   </CORSRule>
+</CORSConfiguration>
+```
+
+- Ensure the bucket or uploaded objects are publicly readable (or configure signed GETs) if you want images to be visible without extra signing. The server returns a standard S3 URL `https://{bucket}.s3.amazonaws.com/{key}` as `public_url`.
